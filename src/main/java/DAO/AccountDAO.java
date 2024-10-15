@@ -28,7 +28,7 @@ public class AccountDAO {
         Connection connection = ConnectionUtil.getConnection();
         try {
             String sql = "INSERT INTO account (username, password) VALUES (?, ?)";
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 
             preparedStatement.setString(1, account.username);
             preparedStatement.setString(2, account.password);
@@ -48,7 +48,7 @@ public class AccountDAO {
     public Account checkAccount(Account account){
         Connection connection = ConnectionUtil.getConnection();
         try {
-            String sql = "SELECT * FROM account WHERE account.username=?, account.password=?";
+            String sql = "SELECT * FROM account WHERE account.username=? AND account.password=?";
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             
             preparedStatement.setString(1, account.username);
@@ -58,6 +58,22 @@ public class AccountDAO {
             while(rs.next()){
                 Account accountWithID = new Account(rs.getInt("account_id"), rs.getString("username"), rs.getString("password"));
                 return accountWithID;
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+        return null;
+    }
+    public Account getAccountByID(int id){
+        Connection connection = ConnectionUtil.getConnection();
+        try {
+            String sql = "SELECT * FROM account WHERE account.account_id=?";
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setInt(1, id);
+            ResultSet rs = preparedStatement.executeQuery();
+            while(rs.next()){
+                Account account = new Account(rs.getInt("account_id"), rs.getString("username"), rs.getString("password"));
+                return account;
             }
         } catch (Exception e) {
             System.out.println(e.getMessage());

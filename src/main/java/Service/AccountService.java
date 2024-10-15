@@ -15,7 +15,8 @@ public class AccountService {
         return accountDAO.getAllAccounts();
     }
     public Account addAccount(Account account){
-        if(account.username!=null && account.password.length()>=4){
+        Account foundAccount = accountDAO.getAccountByID(account.account_id);
+        if(foundAccount==null && account.username.length()>0 && account.password.length()>=4){
             return accountDAO.addAccount(account);
         }
         return null;

@@ -6,6 +6,7 @@ import io.javalin.http.Context;
 import java.util.List;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import Model.Account;
@@ -36,7 +37,7 @@ public class SocialMediaController {
         Javalin app = Javalin.create();
         app.get("/messages", this::getAllMessagesHandler);
         app.get("/messages/{message_id}", this::getMessageByIDHandler);
-        app.get("/messages/{account_id}", this::getMessagesByAccountIDHandler);
+        app.get("/accounts/{account_id}/messages", this::getMessagesByAccountIDHandler);
         app.post("/messages", this::createMessageHandler);
         app.patch("/messages/{message_id}", this::updateMessageHandler);
         app.post("/login", this::postLoginHandler);
@@ -65,9 +66,7 @@ public class SocialMediaController {
     private void getMessagesByAccountIDHandler(Context context){
         int account_id = Integer.parseInt(context.pathParam("account_id"));
         List<Message> messages = messageService.getAllMessagesByAccountID(account_id);
-        if(messages!=null){
-            context.json(messages);
-        }
+        context.json(messages);
     }
     private void createMessageHandler(Context context) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
@@ -80,8 +79,10 @@ public class SocialMediaController {
         }
     }
     private void updateMessageHandler(Context context) throws JsonProcessingException {
-        int message_id = Integer.parseInt(context.pathParam("message_int"));
-        String message_text = context.formParam("message_text");
+        int message_id = Integer.parseInt(context.pathParam("message_id"));
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode node = mapper.readTree(context.body());
+        String message_text = node.get("message_text").asText();
         Message message = messageService.updateMessage(message_id, message_text);
         if(message!=null){
             context.json(message);
